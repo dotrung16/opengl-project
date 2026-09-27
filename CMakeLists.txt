@@ -10,23 +10,34 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-include(CheckIPOSupported)
-check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
-if(ipo_supported)
-  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
-  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO ON)
-else()
-  message(STATUS "IPO/LTO not supported: ${ipo_error}")
+option(APP_ENABLE_LTO "Enable LTO for Release/RelWithDebInfo" ON)
+if(APP_ENABLE_LTO AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error LANGUAGES C CXX)
+  if(ipo_supported)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO ON)
+  else()
+    message(STATUS "IPO/LTO not supported: ${ipo_error}")
+  endif()
 endif()
 
 find_package(glfw3 3.4 REQUIRED)
-find_package(OpenGL REQUIRED)
 
 add_subdirectory(external/glad)
 
-add_executable(app src/main.cpp)
+add_executable(app
+  src/main.cpp
+  src/app.cpp
+  src/window.cpp
+  src/renderer.cpp
+  src/frame_pacer.cpp
+  src/frame_stats.cpp
+)
 
-target_link_libraries(app PRIVATE glfw glad OpenGL::GL)
+target_include_directories(app PRIVATE include)
+target_link_libraries(app PRIVATE glfw glad)
+target_compile_definitions(app PRIVATE GLFW_INCLUDE_NONE)
 
 target_compile_options(app PRIVATE
   $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>
