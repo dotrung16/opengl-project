@@ -34,7 +34,7 @@ void wait_until(const Window& window, double deadline) {
 
   while (now < deadline) {
     glfwWaitEventsTimeout(deadline - now);
-    if (state.needs_redraw || window.should_close()) return;
+    if (state.needs_redraw || state.has_pending_input() || window.should_close()) return;
     now = glfwGetTime();
   }
 }
@@ -44,15 +44,15 @@ void wait_until(const Window& window, double deadline) {
 FramePacer::FramePacer()
     : vsync_(glfwGetPlatform() != GLFW_PLATFORM_WAYLAND),
       min_frame_time_((vsync_ ? kFrameCapSlack : 1.0) / max_refresh_rate()),
-      last_frame_(glfwGetTime() - kBackgroundFrameTime),
-      swap_interval_(vsync_ ? 1 : 0) {
+      swap_interval_(vsync_ ? 1 : 0),
+      schedule_(glfwGetTime() - kBackgroundFrameTime) {
   glfwSwapInterval(swap_interval_);
 }
 
 void FramePacer::wait(const Window& window, double idle_deadline) {
   const WindowState& state = window.state();
   if (state.event_driven) {
-    frame_time_ = 0.0;
+    schedule_.begin_unpaced();
     const double timeout = idle_deadline - glfwGetTime();
     if (state.needs_redraw || timeout <= 0.0) {
       glfwPollEvents();
@@ -60,21 +60,16 @@ void FramePacer::wait(const Window& window, double idle_deadline) {
       glfwWaitEventsTimeout(timeout);
     }
   } else {
-    frame_time_ = state.focused ? min_frame_time_ : kBackgroundFrameTime;
-    deadline_ = last_frame_ + frame_time_;
-    wait_until(window, deadline_);
+    const double frame_time = state.focused ? min_frame_time_ : kBackgroundFrameTime;
+    wait_until(window, schedule_.begin(frame_time));
   }
-}
-
-void FramePacer::mark_frame(double now) {
-  const bool on_schedule = now >= deadline_ && now - deadline_ < frame_time_;
-  last_frame_ = on_schedule ? deadline_ : now;
 }
 
 double FramePacer::wait_hidden() {
   glfwWaitEvents();
-  last_frame_ = glfwGetTime();
-  return last_frame_;
+  const double now = glfwGetTime();
+  schedule_.resync(now);
+  return now;
 }
 
 void FramePacer::update_swap_interval(bool focused) {
