@@ -2,6 +2,7 @@
 
 #include "frame_pacer.hpp"
 #include "frame_stats.hpp"
+#include "input.hpp"
 #include "renderer.hpp"
 #include "window.hpp"
 
@@ -9,7 +10,21 @@
 
 #include <cstdio>
 
+namespace {
+
+void apply_input(Window& window) {
+  const InputActions actions = handle_input(window.state());
+  if (actions.close) window.request_close();
+  if (actions.mode_changed) {
+    std::printf("Event-driven mode: %s\n", window.state().event_driven ? "on" : "off");
+  }
+}
+
+}
+
 int run_app() {
+  std::setvbuf(stdout, nullptr, _IOLBF, 0);
+
   GlfwLibrary glfw;
   if (!glfw.ok()) return 1;
 
@@ -18,7 +33,6 @@ int run_app() {
 
   Renderer renderer;
   if (!renderer.init()) return 1;
-  window->install_callbacks();
 
   std::printf("GL %d.%d | %s | %s\n", renderer.version_major(), renderer.version_minor(),
               renderer.device_name(), platform_name());
@@ -30,6 +44,7 @@ int run_app() {
   while (!window->should_close()) {
     if (window->is_hidden()) {
       stats.reset(pacer.wait_hidden(), state);
+      apply_input(*window);
       continue;
     }
 
@@ -38,8 +53,11 @@ int run_app() {
     const double now = glfwGetTime();
     stats.record_wakeup(now - wait_start);
 
+    apply_input(*window);
+    if (window->should_close()) break;
+
     pacer.update_swap_interval(state.focused);
-    stats.report_if_due(now, state);
+    if (const auto report = stats.report_if_due(now, state)) print_report(*report);
 
     if (state.event_driven && !state.needs_redraw) continue;
     state.needs_redraw = false;
