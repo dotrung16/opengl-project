@@ -38,15 +38,8 @@ void refresh_callback(GLFWwindow* window) {
 }
 
 void key_callback(GLFWwindow* window, int key, int, int action, int) {
-  if (action != GLFW_PRESS) return;
-  if (key == GLFW_KEY_ESCAPE) {
-    glfwSetWindowShouldClose(window, GLFW_TRUE);
-  } else if (key == GLFW_KEY_E) {
-    WindowState& state = state_of(window);
-    state.event_driven = !state.event_driven;
-    state.needs_redraw = true;
-    std::printf("Event-driven mode: %s\n", state.event_driven ? "on" : "off");
-  }
+  if (action != GLFW_PRESS || key == GLFW_KEY_UNKNOWN) return;
+  state_of(window).pressed_keys.push_back(key);
 }
 
 }
@@ -87,6 +80,12 @@ Window::Window(GLFWwindow* handle) : handle_(handle) {
   glfwGetFramebufferSize(handle_, &state_.fb_width, &state_.fb_height);
   state_.focused = (glfwGetWindowAttrib(handle_, GLFW_FOCUSED) != 0);
   glfwMakeContextCurrent(handle_);
+
+  glfwSetFramebufferSizeCallback(handle_, framebuffer_size_callback);
+  glfwSetWindowFocusCallback(handle_, focus_callback);
+  glfwSetWindowIconifyCallback(handle_, iconify_callback);
+  glfwSetWindowRefreshCallback(handle_, refresh_callback);
+  glfwSetKeyCallback(handle_, key_callback);
 }
 
 Window::~Window() {
@@ -97,16 +96,12 @@ bool Window::should_close() const {
   return glfwWindowShouldClose(handle_) != 0;
 }
 
-bool Window::is_hidden() const {
-  return state_.iconified || state_.fb_width == 0 || state_.fb_height == 0;
+void Window::request_close() {
+  glfwSetWindowShouldClose(handle_, GLFW_TRUE);
 }
 
-void Window::install_callbacks() {
-  glfwSetFramebufferSizeCallback(handle_, framebuffer_size_callback);
-  glfwSetWindowFocusCallback(handle_, focus_callback);
-  glfwSetWindowIconifyCallback(handle_, iconify_callback);
-  glfwSetWindowRefreshCallback(handle_, refresh_callback);
-  glfwSetKeyCallback(handle_, key_callback);
+bool Window::is_hidden() const {
+  return state_.iconified || state_.fb_width == 0 || state_.fb_height == 0;
 }
 
 void Window::swap_buffers() {
