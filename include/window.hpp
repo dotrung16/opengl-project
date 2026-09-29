@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 struct GLFWwindow;
 
@@ -11,6 +12,9 @@ struct WindowState {
   bool iconified = false;
   bool event_driven = true;
   bool needs_redraw = true;
+  std::vector<int> pressed_keys;
+
+  bool has_pending_input() const { return !pressed_keys.empty(); }
 };
 
 class GlfwLibrary {
@@ -36,8 +40,8 @@ class Window {
   WindowState& state() { return state_; }
   const WindowState& state() const { return state_; }
   bool should_close() const;
+  void request_close();
   bool is_hidden() const;
-  void install_callbacks();
   void swap_buffers();
 
  private:
