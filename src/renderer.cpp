@@ -45,7 +45,8 @@ int Renderer::version_minor() const {
 }
 
 const char* Renderer::device_name() const {
-  return reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+  const GLubyte* name = glGetString(GL_RENDERER);
+  return name ? reinterpret_cast<const char*>(name) : "unknown";
 }
 
 void Renderer::draw(int width, int height) {
