@@ -56,5 +56,9 @@
     { "name": "release-o3", "configurePreset": "release-o3" },
     { "name": "release-nolto", "configurePreset": "release-nolto" },
     { "name": "relwithdebinfo", "configurePreset": "relwithdebinfo" }
+  ],
+  "testPresets": [
+    { "name": "debug", "configurePreset": "debug", "output": { "outputOnFailure": true } },
+    { "name": "asan", "configurePreset": "asan", "output": { "outputOnFailure": true } }
   ]
 }
