@@ -25,16 +25,30 @@ if(APP_ENABLE_LTO AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   endif()
 endif()
 
-find_package(glfw3 3.4 REQUIRED)
+find_package(glfw3 3.4 QUIET)
+if(NOT glfw3_FOUND)
+  message(STATUS "GLFW 3.4 not found, fetching it from source")
+  include(FetchContent)
+  set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+  set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+  set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+  FetchContent_Declare(glfw
+    GIT_REPOSITORY https://github.com/glfw/glfw.git
+    GIT_TAG 3.4
+    GIT_SHALLOW TRUE
+  )
+  FetchContent_MakeAvailable(glfw)
+endif()
 
 add_subdirectory(external/glad)
 
 add_library(app_options INTERFACE)
 target_compile_features(app_options INTERFACE cxx_std_20)
 target_compile_options(app_options INTERFACE
-  $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic -Wshadow>
-  $<$<AND:$<BOOL:${APP_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:GNU,Clang>>:-Werror>
-  $<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:GNU,Clang>>:-ffunction-sections -fdata-sections>
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra -Wpedantic -Wshadow>
+  $<$<AND:$<BOOL:${APP_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:GNU,Clang,AppleClang>>:-Werror>
+  $<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:GNU,Clang,AppleClang>>:-ffunction-sections -fdata-sections>
 )
 
 add_library(app_core STATIC
@@ -52,7 +66,8 @@ target_compile_definitions(app_core PRIVATE GLFW_INCLUDE_NONE)
 add_executable(app src/main.cpp)
 target_link_libraries(app PRIVATE app_core)
 target_link_options(app PRIVATE
-  $<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:GNU,Clang>>:-Wl,--gc-sections>
+  $<$<AND:$<CONFIG:Release>,$<PLATFORM_ID:Darwin>>:-Wl,-dead_strip>
+  $<$<AND:$<CONFIG:Release>,$<NOT:$<PLATFORM_ID:Darwin>>,$<CXX_COMPILER_ID:GNU,Clang>>:-Wl,--gc-sections>
 )
 
 if(APP_BUILD_TESTS)
