@@ -23,7 +23,11 @@ void apply_input(Window& window) {
 }
 
 int run_app() {
-  std::setvbuf(stdout, nullptr, _IOLBF, 0);
+#ifdef _WIN32
+  std::setvbuf(stdout, nullptr, _IONBF, 0);  // Windows has no line buffering
+#else
+  std::setvbuf(stdout, nullptr, _IOLBF, BUFSIZ);
+#endif
 
   GlfwLibrary glfw;
   if (!glfw.ok()) return 1;
@@ -55,6 +59,7 @@ int run_app() {
 
     apply_input(*window);
     if (window->should_close()) break;
+    if (!state.event_driven && !state.needs_redraw && now < pacer.deadline()) continue;
 
     pacer.update_swap_interval(state.focused);
     if (const auto report = stats.report_if_due(now, state)) print_report(*report);
