@@ -23,6 +23,7 @@ class FrameSchedule {
   void resync(double now) { last_frame_ = now; }
 
   double last_frame() const { return last_frame_; }
+  double deadline() const { return deadline_; }
 
  private:
   double last_frame_;
