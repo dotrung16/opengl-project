@@ -15,6 +15,14 @@ void GLAD_API_PTR gl_debug_callback(GLenum, GLenum type, GLuint id, GLenum sever
 }
 #endif
 
+#ifndef NDEBUG
+void check_gl_errors(const char* where) {
+  for (GLenum err; (err = glGetError()) != GL_NO_ERROR;) {
+    std::fprintf(stderr, "GL error 0x%x in %s\n", err, where);
+  }
+}
+#endif
+
 }
 
 bool Renderer::init() {
@@ -50,10 +58,10 @@ const char* Renderer::device_name() const {
 }
 
 void Renderer::draw(int width, int height) {
-  if (width != viewport_width_ || height != viewport_height_) {
-    glViewport(0, 0, width, height);
-    viewport_width_ = width;
-    viewport_height_ = height;
-  }
+  glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT);
+
+#ifndef NDEBUG
+  check_gl_errors("Renderer::draw");
+#endif
 }

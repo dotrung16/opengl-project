@@ -2,6 +2,10 @@
 
 class Renderer {
  public:
+  Renderer() = default;
+  Renderer(const Renderer&) = delete;
+  Renderer& operator=(const Renderer&) = delete;
+
   bool init();
 
   int version_major() const;
@@ -12,6 +16,4 @@ class Renderer {
 
  private:
   int version_ = 0;
-  int viewport_width_ = 0;
-  int viewport_height_ = 0;
 };
