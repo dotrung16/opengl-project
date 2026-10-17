@@ -12,7 +12,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(APP_ENABLE_LTO "Enable LTO for Release/RelWithDebInfo" ON)
 option(APP_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
-option(APP_BUILD_TESTS "Build unit tests" ON)
+if (CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+  set(app_top_level ON)
+else ()
+  set(app_top_level OFF)
+endif()
+option(APP_BUILD_TESTS "Build unit tests" ${app_top_level})
 
 if(APP_ENABLE_LTO AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   include(CheckIPOSupported)
@@ -47,8 +52,10 @@ add_library(app_options INTERFACE)
 target_compile_features(app_options INTERFACE cxx_std_20)
 target_compile_options(app_options INTERFACE
   $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra -Wpedantic -Wshadow>
+  $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
   $<$<AND:$<BOOL:${APP_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:GNU,Clang,AppleClang>>:-Werror>
-  $<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:GNU,Clang,AppleClang>>:-ffunction-sections -fdata-sections>
+  $<$<AND:$<BOOL:${APP_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+  $<$<AND:$<CONFIG:Release,RelWithDebInfo,MinSizeRel>,$<CXX_COMPILER_ID:GNU,Clang,AppleClang>>:-ffunction-sections -fdata-sections>
 )
 
 add_library(app_core STATIC
@@ -66,8 +73,8 @@ target_compile_definitions(app_core PRIVATE GLFW_INCLUDE_NONE)
 add_executable(app src/main.cpp)
 target_link_libraries(app PRIVATE app_core)
 target_link_options(app PRIVATE
-  $<$<AND:$<CONFIG:Release>,$<PLATFORM_ID:Darwin>>:-Wl,-dead_strip>
-  $<$<AND:$<CONFIG:Release>,$<NOT:$<PLATFORM_ID:Darwin>>,$<CXX_COMPILER_ID:GNU,Clang>>:-Wl,--gc-sections>
+  $<$<AND:$<CONFIG:Release,RelWithDebInfo,MinSizeRel>,$<PLATFORM_ID:Darwin>>:-Wl,-dead_strip>
+  $<$<AND:$<CONFIG:Release,RelWithDebInfo,MinSizeRel>,$<NOT:$<PLATFORM_ID:Darwin>>,$<CXX_COMPILER_ID:GNU,Clang>>:-Wl,--gc-sections>
 )
 
 if(APP_BUILD_TESTS)
