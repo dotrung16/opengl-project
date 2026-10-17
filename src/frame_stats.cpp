@@ -6,7 +6,7 @@
 #include <cstdio>
 
 void print_report(const FrameReport& report) {
-  std::printf("[Power Stats] Span: %.1f s | FPS: %.1f | Avg frame: %.2f ms | "
+  std::printf("[Power Stats] Span: %.1f s | FPS: %.1f | Avg interval: %.2f ms | "
               "Wakeups/s: %.1f | Max wait: %.1f ms | Max swap: %.1f ms | "
               "Focused: %s | Mode: %s\n",
               report.span, report.fps, report.avg_frame_ms, report.wakeups_per_sec,
