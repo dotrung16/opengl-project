@@ -12,6 +12,7 @@ class FramePacer {
   double wait_hidden();
   void update_swap_interval(bool focused);
   void mark_frame(double now) { schedule_.mark(now); }
+  double deadline() const { return schedule_.deadline(); }
 
  private:
   bool vsync_;
