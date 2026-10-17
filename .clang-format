@@ -1,0 +1,4 @@
+BasedOnStyle: Google
+ColumnLimit: 100
+FixNamespaceComments: false
+AllowShortCaseLabelsOnASingleLine: true
