@@ -65,6 +65,7 @@ add_library(app_core STATIC
   src/frame_pacer.cpp
   src/frame_stats.cpp
   src/input.cpp
+  src/shader.cpp
 )
 target_include_directories(app_core PUBLIC include)
 target_link_libraries(app_core PUBLIC app_options PRIVATE glfw glad)
