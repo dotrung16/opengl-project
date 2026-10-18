@@ -1,4 +1,8 @@
 BasedOnStyle: Google
 ColumnLimit: 100
 FixNamespaceComments: false
-AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortCaseLabelsOnASingleLine: false
+IncludeBlocks: Preserve
+SortIncludes: CaseInsensitive
+IncludeIsMainRegex: '$'
