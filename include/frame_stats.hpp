@@ -15,22 +15,23 @@ struct FrameReport {
   bool event_driven = false;
 };
 
-void print_report(const FrameReport& report);
+void print_report(const FrameReport &report);
 
 class FrameStats {
- public:
+public:
   static constexpr double kInterval = 3.0;
 
-  FrameStats(double now, const WindowState& state) { reset(now, state); }
+  FrameStats(double now, const WindowState &state) { reset(now, state); }
 
-  void reset(double now, const WindowState& state);
+  void reset(double now, const WindowState &state);
   void record_wakeup(double wait_time);
   void record_frame() { ++frames_; }
   void record_swap(double swap_time);
-  std::optional<FrameReport> report_if_due(double now, const WindowState& state);
+  std::optional<FrameReport> report_if_due(double now,
+                                           const WindowState &state);
   double next_report() const { return window_start_ + kInterval; }
 
- private:
+private:
   double window_start_ = 0.0;
   int frames_ = 0;
   int wakeups_ = 0;

@@ -6,26 +6,27 @@
 
 namespace {
 
-void handle_key(WindowState& state, InputActions& actions, int key) {
+void handle_key(WindowState &state, InputActions &actions, int key) {
   switch (key) {
-    case GLFW_KEY_ESCAPE:
-      actions.close = true;
-      break;
-    case GLFW_KEY_E:
-      state.event_driven = !state.event_driven;
-      state.needs_redraw = true;
-      actions.mode_changed = true;
-      break;
-    default:
-      break;
+  case GLFW_KEY_ESCAPE:
+    actions.close = true;
+    break;
+  case GLFW_KEY_E:
+    state.event_driven = !state.event_driven;
+    state.needs_redraw = true;
+    actions.mode_changed = true;
+    break;
+  default:
+    break;
   }
 }
 
-}
+} // namespace
 
-InputActions handle_input(WindowState& state) {
+InputActions handle_input(WindowState &state) {
   InputActions actions;
-  for (const int key : state.pressed_keys) handle_key(state, actions, key);
+  for (const int key : state.pressed_keys)
+    handle_key(state, actions, key);
   state.pressed_keys.clear();
   return actions;
 }

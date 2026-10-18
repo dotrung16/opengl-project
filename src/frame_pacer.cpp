@@ -14,18 +14,18 @@ constexpr int kFallbackRefreshRate = 60;
 
 int max_refresh_rate() {
   int count = 0;
-  GLFWmonitor** monitors = glfwGetMonitors(&count);
+  GLFWmonitor **monitors = glfwGetMonitors(&count);
   int rate = 0;
   for (int i = 0; i < count; ++i) {
-    if (const GLFWvidmode* mode = glfwGetVideoMode(monitors[i])) {
+    if (const GLFWvidmode *mode = glfwGetVideoMode(monitors[i])) {
       rate = std::max(rate, mode->refreshRate);
     }
   }
   return rate > 0 ? rate : kFallbackRefreshRate;
 }
 
-void wait_until(const Window& window, double deadline) {
-  const WindowState& state = window.state();
+void wait_until(const Window &window, double deadline) {
+  const WindowState &state = window.state();
   double now = glfwGetTime();
   if (now >= deadline || state.needs_redraw) {
     glfwPollEvents();
@@ -34,12 +34,14 @@ void wait_until(const Window& window, double deadline) {
 
   while (now < deadline) {
     glfwWaitEventsTimeout(deadline - now);
-    if (state.needs_redraw || state.has_pending_input() || window.should_close()) return;
+    if (state.needs_redraw || state.has_pending_input() ||
+        window.should_close())
+      return;
     now = glfwGetTime();
   }
 }
 
-}
+} // namespace
 
 FramePacer::FramePacer()
     : vsync_(glfwGetPlatform() != GLFW_PLATFORM_WAYLAND),
@@ -49,8 +51,8 @@ FramePacer::FramePacer()
   glfwSwapInterval(swap_interval_);
 }
 
-void FramePacer::wait(const Window& window, double idle_deadline) {
-  const WindowState& state = window.state();
+void FramePacer::wait(const Window &window, double idle_deadline) {
+  const WindowState &state = window.state();
   if (state.event_driven) {
     schedule_.begin_unpaced();
     const double timeout = idle_deadline - glfwGetTime();
@@ -60,7 +62,8 @@ void FramePacer::wait(const Window& window, double idle_deadline) {
       glfwWaitEventsTimeout(timeout);
     }
   } else {
-    const double frame_time = state.focused ? min_frame_time_ : kBackgroundFrameTime;
+    const double frame_time =
+        state.focused ? min_frame_time_ : kBackgroundFrameTime;
     wait_until(window, schedule_.begin(frame_time));
   }
 }

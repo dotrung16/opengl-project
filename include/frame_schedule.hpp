@@ -1,7 +1,7 @@
 #pragma once
 
 class FrameSchedule {
- public:
+public:
   explicit FrameSchedule(double last_frame) : last_frame_(last_frame) {}
 
   double begin(double frame_time) {
@@ -25,7 +25,7 @@ class FrameSchedule {
   double last_frame() const { return last_frame_; }
   double deadline() const { return deadline_; }
 
- private:
+private:
   double last_frame_;
   double deadline_ = 0.0;
   double frame_time_ = 0.0;

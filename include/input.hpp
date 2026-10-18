@@ -7,4 +7,4 @@ struct InputActions {
   bool mode_changed = false;
 };
 
-InputActions handle_input(WindowState& state);
+InputActions handle_input(WindowState &state);

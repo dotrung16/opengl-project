@@ -1,29 +1,31 @@
 #include "renderer.hpp"
 
-#include <glad/gl.h>
 #include <GLFW/glfw3.h>
+#include <glad/gl.h>
 
 #include <cstdio>
 
 namespace {
 
 #if !defined(NDEBUG) && defined(GL_KHR_debug)
-void GLAD_API_PTR gl_debug_callback(GLenum, GLenum type, GLuint id, GLenum severity,
-                                    GLsizei, const GLchar* message, const void*) {
-  if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
+void GLAD_API_PTR gl_debug_callback(GLenum, GLenum type, GLuint id,
+                                    GLenum severity, GLsizei,
+                                    const GLchar *message, const void *) {
+  if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
+    return;
   std::fprintf(stderr, "GL debug [id %u, type 0x%x]: %s\n", id, type, message);
 }
 #endif
 
 #ifndef NDEBUG
-void check_gl_errors(const char* where) {
+void check_gl_errors(const char *where) {
   for (GLenum err; (err = glGetError()) != GL_NO_ERROR;) {
     std::fprintf(stderr, "GL error 0x%x in %s\n", err, where);
   }
 }
 #endif
 
-}
+} // namespace
 
 bool Renderer::init() {
   version_ = gladLoadGL(glfwGetProcAddress);
@@ -44,17 +46,13 @@ bool Renderer::init() {
   return true;
 }
 
-int Renderer::version_major() const {
-  return GLAD_VERSION_MAJOR(version_);
-}
+int Renderer::version_major() const { return GLAD_VERSION_MAJOR(version_); }
 
-int Renderer::version_minor() const {
-  return GLAD_VERSION_MINOR(version_);
-}
+int Renderer::version_minor() const { return GLAD_VERSION_MINOR(version_); }
 
-const char* Renderer::device_name() const {
-  const GLubyte* name = glGetString(GL_RENDERER);
-  return name ? reinterpret_cast<const char*>(name) : "unknown";
+const char *Renderer::device_name() const {
+  const GLubyte *name = glGetString(GL_RENDERER);
+  return name ? reinterpret_cast<const char *>(name) : "unknown";
 }
 
 void Renderer::draw(int width, int height) {

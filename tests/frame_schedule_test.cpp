@@ -5,7 +5,7 @@
 namespace {
 constexpr double kEps = 1e-9;
 constexpr double kFrame = 0.016;
-}
+} // namespace
 
 TEST(schedule_deadline_is_last_frame_plus_frame_time) {
   FrameSchedule schedule(1.0);

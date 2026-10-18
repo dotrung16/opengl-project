@@ -1,8 +1,0 @@
-BasedOnStyle: Google
-ColumnLimit: 100
-FixNamespaceComments: false
-AllowShortFunctionsOnASingleLine: Inline
-AllowShortCaseLabelsOnASingleLine: false
-IncludeBlocks: Preserve
-SortIncludes: CaseInsensitive
-IncludeIsMainRegex: '$'

@@ -5,17 +5,17 @@
 #include <algorithm>
 #include <cstdio>
 
-void print_report(const FrameReport& report) {
-  std::printf("[Power Stats] Span: %.1f s | FPS: %.1f | Avg interval: %.2f ms | "
-              "Wakeups/s: %.1f | Max wait: %.1f ms | Max swap: %.1f ms | "
-              "Focused: %s | Mode: %s\n",
-              report.span, report.fps, report.avg_frame_ms, report.wakeups_per_sec,
-              report.max_wait_ms, report.max_swap_ms,
-              report.focused ? "Yes" : "No",
-              report.event_driven ? "event-driven" : "continuous");
+void print_report(const FrameReport &report) {
+  std::printf(
+      "[Power Stats] Span: %.1f s | FPS: %.1f | Avg interval: %.2f ms | "
+      "Wakeups/s: %.1f | Max wait: %.1f ms | Max swap: %.1f ms | "
+      "Focused: %s | Mode: %s\n",
+      report.span, report.fps, report.avg_frame_ms, report.wakeups_per_sec,
+      report.max_wait_ms, report.max_swap_ms, report.focused ? "Yes" : "No",
+      report.event_driven ? "event-driven" : "continuous");
 }
 
-void FrameStats::reset(double now, const WindowState& state) {
+void FrameStats::reset(double now, const WindowState &state) {
   window_start_ = now;
   frames_ = 0;
   wakeups_ = 0;
@@ -34,10 +34,13 @@ void FrameStats::record_swap(double swap_time) {
   max_swap_ = std::max(max_swap_, swap_time);
 }
 
-std::optional<FrameReport> FrameStats::report_if_due(double now, const WindowState& state) {
+std::optional<FrameReport> FrameStats::report_if_due(double now,
+                                                     const WindowState &state) {
   const double elapsed = now - window_start_;
-  const bool changed = state.focused != focused_ || state.event_driven != event_driven_;
-  if (!changed && elapsed < kInterval) return std::nullopt;
+  const bool changed =
+      state.focused != focused_ || state.event_driven != event_driven_;
+  if (!changed && elapsed < kInterval)
+    return std::nullopt;
 
   std::optional<FrameReport> report;
   if (elapsed > 0.0) {

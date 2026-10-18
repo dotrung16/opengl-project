@@ -5,16 +5,16 @@
 class Window;
 
 class FramePacer {
- public:
+public:
   FramePacer();
 
-  void wait(const Window& window, double idle_deadline);
+  void wait(const Window &window, double idle_deadline);
   double wait_hidden();
   void update_swap_interval(bool focused);
   void mark_frame(double now) { schedule_.mark(now); }
   double deadline() const { return schedule_.deadline(); }
 
- private:
+private:
   bool vsync_;
   double min_frame_time_;
   int swap_interval_;
