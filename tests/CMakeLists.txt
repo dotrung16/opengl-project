@@ -13,6 +13,7 @@ add_executable(gl_tests
   gl_test_main.cpp
   window_test.cpp
   renderer_test.cpp
+  shader_test.cpp
 )
 target_link_libraries(gl_tests PRIVATE app_core glfw glad)
 target_compile_definitions(gl_tests PRIVATE GLFW_INCLUDE_NONE)
