@@ -18,8 +18,8 @@ GLuint compile(GLenum type, const char* source) {
   if (ok != GL_TRUE) {
     char log[1024] = {};
     glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
-    std::fprintf(stderr, "%s shader error:\n%s\n",
-                 type == GL_VERTEX_SHADER ? "Vertex" : "Fragment", log);
+    std::fprintf(stderr, "%s shader error:\n%s\n", type == GL_VERTEX_SHADER ? "Vertex" : "Fragment",
+                 log);
     glDeleteShader(shader);
     return 0;
   }
@@ -27,14 +27,13 @@ GLuint compile(GLenum type, const char* source) {
   return shader;
 }
 
-} // namespace
+}  // namespace
 
 ShaderProgram::~ShaderProgram() {
   if (id_ != 0) glDeleteProgram(id_);
 }
 
-ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept
-  : id_(std::exchange(other.id_, 0)) {}
+ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept : id_(std::exchange(other.id_, 0)) {}
 
 ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other) noexcept {
   std::swap(id_, other.id_);

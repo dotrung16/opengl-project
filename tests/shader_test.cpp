@@ -27,7 +27,7 @@ bool load_gl() {
   return gladLoadGL(glfwGetProcAddress) != 0;
 }
 
-} // namespace
+}  // namespace
 
 TEST(shader_builds_valid_program) {
   GlFixture f;
