@@ -16,8 +16,11 @@ struct GlFixture {
   GlFixture() {
     if (!glfw.ok())
       return;
-    
-    window = Window::create({.width = kWidth, .height = kHeight, .title = "test", .visible = false, .scale_framebuffer = false});
+    window = Window::create({.width = kWidth,
+                             .height = kHeight,
+                             .title = "test",
+                             .visible = false,
+                             .scale_framebuffer = false});
   }
 
   bool ok() const { return window != nullptr; }
