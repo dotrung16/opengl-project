@@ -1,6 +1,7 @@
 #include "window.hpp"
 
 #include <GLFW/glfw3.h>
+#include <glad/gl.h>
 
 #include <cstdio>
 
@@ -57,8 +58,8 @@ GlfwLibrary::~GlfwLibrary() {
     glfwTerminate();
 }
 
-std::unique_ptr<Window> Window::create(int width, int height,
-                                       const char *title) {
+std::unique_ptr<Window> Window::create(const WindowConfig &config) {
+  glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -66,17 +67,25 @@ std::unique_ptr<Window> Window::create(int width, int height,
 
   glfwWindowHint(GLFW_DEPTH_BITS, 0);
   glfwWindowHint(GLFW_STENCIL_BITS, 0);
+  glfwWindowHint(GLFW_VISIBLE ,config.visible ? GLFW_TRUE : GLFW_FALSE);
+  glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, config.scale_framebuffer ? GLFW_TRUE : GLFW_FALSE);
 
 #ifndef NDEBUG
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 
-  GLFWwindow *handle = glfwCreateWindow(width, height, title, nullptr, nullptr);
+  GLFWwindow *handle = glfwCreateWindow(config.width, config.height,
+                                        config.title, nullptr, nullptr);
   if (!handle) {
     std::fprintf(stderr, "Failed to create window\n");
     return nullptr;
   }
-  return std::unique_ptr<Window>(new Window(handle));
+  std::unique_ptr<Window> window(new Window(handle));
+  if (gladLoadGL(glfwGetProcAddress) == 0) {
+    std::fprintf(stderr, "Failed to load GL functions\n");
+    return nullptr;
+  }
+  return window;
 }
 
 Window::Window(GLFWwindow *handle) : handle_(handle) {

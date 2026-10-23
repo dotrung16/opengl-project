@@ -23,13 +23,11 @@ constexpr const char *kBroken = R"(#version 330 core
 void main() { this_is_not_glsl; }
 )";
 
-bool load_gl() { return gladLoadGL(glfwGetProcAddress) != 0; }
-
 } // namespace
 
 TEST(shader_builds_valid_program) {
   GlFixture f;
-  if (!f.ok() || !load_gl())
+  if (!f.ok())
     return;
   ShaderProgram program;
   CHECK(program.build(kVertex, kFragment));
@@ -40,7 +38,7 @@ TEST(shader_builds_valid_program) {
 
 TEST(shader_broken_source_fails) {
   GlFixture f;
-  if (!f.ok() || !load_gl())
+  if (!f.ok())
     return;
   ShaderProgram program;
   CHECK(!program.build(kBroken, kFragment));
@@ -50,7 +48,7 @@ TEST(shader_broken_source_fails) {
 
 TEST(shader_failed_rebuild_keeps_old_program) {
   GlFixture f;
-  if (!f.ok() || !load_gl())
+  if (!f.ok())
     return;
   ShaderProgram program;
   CHECK(program.build(kVertex, kFragment));
@@ -60,11 +58,38 @@ TEST(shader_failed_rebuild_keeps_old_program) {
 
 TEST(shader_move_transfers_ownership) {
   GlFixture f;
-  if (!f.ok() || !load_gl())
+  if (!f.ok())
     return;
   ShaderProgram first;
   CHECK(first.build(kVertex, kFragment));
   ShaderProgram second = std::move(first);
   CHECK(!first.valid());
   CHECK(second.valid());
+}
+
+TEST(shader_move_assign_releases_source) {
+  GlFixture f;
+  if (!f.ok())
+    return;
+  ShaderProgram first;
+  ShaderProgram second;
+  CHECK(first.build(kVertex, kFragment));
+  CHECK(second.build(kVertex, kFragment));
+  first = std::move(second);
+  CHECK(first.valid());
+  CHECK(!second.valid());
+  CHECK(glGetError() == GL_NO_ERROR);
+}
+
+TEST(shader_uniform_setters_raise_no_errors) {
+  GlFixture f;
+  if (!f.ok())
+    return;
+  ShaderProgram program;
+  CHECK(program.build(kVertex, kFragment));
+  program.use();
+  program.set_vec4("u_color", 0.25f, 0.5f, 0.75f, 1.0f);
+  CHECK(program.uniform("u_color") == program.uniform("u_color"));
+  CHECK(program.uniform("u_missing") == -1);
+  CHECK(glGetError() == GL_NO_ERROR);
 }

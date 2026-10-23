@@ -30,10 +30,17 @@ private:
   bool ok_ = false;
 };
 
+struct WindowConfig {
+  int width = 800;
+  int height = 600;
+  const char* title = "Window";
+  bool visible = true;
+  bool scale_framebuffer = true;
+};
+
 class Window {
 public:
-  static std::unique_ptr<Window> create(int width, int height,
-                                        const char *title);
+  static std::unique_ptr<Window> create(const WindowConfig &config);
   ~Window();
   Window(const Window &) = delete;
   Window &operator=(const Window &) = delete;

@@ -1,6 +1,5 @@
 #include "renderer.hpp"
 
-#include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
 #include <cstdio>
@@ -28,11 +27,8 @@ void check_gl_errors(const char *where) {
 } // namespace
 
 bool Renderer::init() {
-  version_ = gladLoadGL(glfwGetProcAddress);
-  if (version_ == 0) {
-    std::fprintf(stderr, "Failed to load GL functions\n");
-    return false;
-  }
+  glGetIntegerv(GL_MAJOR_VERSION, &major_);
+  glGetIntegerv(GL_MINOR_VERSION, &minor_);
 
 #if !defined(NDEBUG) && defined(GL_KHR_debug)
   if (GLAD_GL_KHR_debug) {
@@ -45,10 +41,6 @@ bool Renderer::init() {
   glClearColor(0.15f, 0.45f, 0.45f, 1.0f);
   return true;
 }
-
-int Renderer::version_major() const { return GLAD_VERSION_MAJOR(version_); }
-
-int Renderer::version_minor() const { return GLAD_VERSION_MINOR(version_); }
 
 const char *Renderer::device_name() const {
   const GLubyte *name = glGetString(GL_RENDERER);

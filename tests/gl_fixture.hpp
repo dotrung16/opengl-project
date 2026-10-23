@@ -16,9 +16,8 @@ struct GlFixture {
   GlFixture() {
     if (!glfw.ok())
       return;
-    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, GLFW_FALSE);
-    window = Window::create(kWidth, kHeight, "test");
+    
+    window = Window::create({.width = kWidth, .height = kHeight, .title = "test", .visible = false, .scale_framebuffer = false});
   }
 
   bool ok() const { return window != nullptr; }

@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include <cstdio>
+#include <memory>
 
 namespace {
 
@@ -35,10 +36,11 @@ int run_app() {
   if (!glfw.ok())
     return 1;
 
-  std::unique_ptr<Window> window = Window::create(800, 600, "OpenGL");
+  std::unique_ptr<Window> window = Window::create({.title = "Window"});
   if (!window)
     return 1;
 
+  // Declared after `window` so it's destroyed while the GL context is alive
   Renderer renderer;
   if (!renderer.init())
     return 1;

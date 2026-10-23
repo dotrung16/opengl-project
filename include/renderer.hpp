@@ -8,12 +8,13 @@ public:
 
   bool init();
 
-  int version_major() const;
-  int version_minor() const;
+  int version_major() const { return major_; }
+  int version_minor() const { return minor_; }
   const char *device_name() const;
 
   void draw(int width, int height);
 
 private:
-  int version_ = 0;
+  int major_ = 0;
+  int minor_ = 0;
 };
