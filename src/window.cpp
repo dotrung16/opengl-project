@@ -44,6 +44,21 @@ void key_callback(GLFWwindow *window, int key, int, int action, int) {
   state_of(window).pressed_keys.push_back(key);
 }
 
+void cursor_pos_callback(GLFWwindow *window, double x, double y) {
+  WindowState &state = state_of(window);
+  if (state.has_cursor) {
+    state.cursor_dx += x - state.cursor_x;
+    state.cursor_dy += y - state.cursor_y;
+  }
+  state.cursor_x = x;
+  state.cursor_y = y;
+  state.has_cursor = true;
+}
+
+void scroll_callback(GLFWwindow *window, double, double y) {
+  state_of(window).scroll_dy += y;
+}
+
 } // namespace
 
 GlfwLibrary::GlfwLibrary() {
@@ -65,10 +80,11 @@ std::unique_ptr<Window> Window::create(const WindowConfig &config) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
-  glfwWindowHint(GLFW_DEPTH_BITS, 0);
+  glfwWindowHint(GLFW_DEPTH_BITS, 24);
   glfwWindowHint(GLFW_STENCIL_BITS, 0);
-  glfwWindowHint(GLFW_VISIBLE ,config.visible ? GLFW_TRUE : GLFW_FALSE);
-  glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, config.scale_framebuffer ? GLFW_TRUE : GLFW_FALSE);
+  glfwWindowHint(GLFW_VISIBLE, config.visible ? GLFW_TRUE : GLFW_FALSE);
+  glfwWindowHint(GLFW_SCALE_FRAMEBUFFER,
+                 config.scale_framebuffer ? GLFW_TRUE : GLFW_FALSE);
 
 #ifndef NDEBUG
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
@@ -99,6 +115,8 @@ Window::Window(GLFWwindow *handle) : handle_(handle) {
   glfwSetWindowIconifyCallback(handle_, iconify_callback);
   glfwSetWindowRefreshCallback(handle_, refresh_callback);
   glfwSetKeyCallback(handle_, key_callback);
+  glfwSetCursorPosCallback(handle_, cursor_pos_callback);
+  glfwSetScrollCallback(handle_, scroll_callback);
 }
 
 Window::~Window() { glfwDestroyWindow(handle_); }
@@ -111,6 +129,10 @@ void Window::request_close() { glfwSetWindowShouldClose(handle_, GLFW_TRUE); }
 
 bool Window::is_hidden() const {
   return state_.iconified || state_.fb_width == 0 || state_.fb_height == 0;
+}
+
+bool Window::key_down(int key) const {
+  return glfwGetKey(handle_, key) == GLFW_PRESS;
 }
 
 void Window::swap_buffers() { glfwSwapBuffers(handle_); }

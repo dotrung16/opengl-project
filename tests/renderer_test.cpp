@@ -116,3 +116,18 @@ TEST(renderer_draw_clears_to_background_color) {
   CHECK(to_byte(clear[3]) == 255);
   CHECK(glGetError() == GL_NO_ERROR);
 }
+
+TEST(renderer_init_enables_depth_test_with_depth_buffer) {
+  GlFixture f;
+  if (!f.ok())
+    return;
+  Renderer renderer;
+  CHECK(renderer.init());
+  CHECK(glIsEnabled(GL_DEPTH_TEST) == GL_TRUE);
+  GLint depth_bits = 0;
+  glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH,
+                                        GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE,
+                                        &depth_bits);
+  CHECK(depth_bits >= 24);
+  CHECK(glGetError() == GL_NO_ERROR);
+}

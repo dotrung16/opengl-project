@@ -13,6 +13,12 @@ struct WindowState {
   bool event_driven = true;
   bool needs_redraw = true;
   std::vector<int> pressed_keys;
+  double cursor_x = 0.0;
+  double cursor_y = 0.0;
+  double cursor_dx = 0.0;
+  double cursor_dy = 0.0;
+  double scroll_dy = 0.0;
+  bool has_cursor = false;
 
   bool has_pending_input() const { return !pressed_keys.empty(); }
 };
@@ -33,7 +39,7 @@ private:
 struct WindowConfig {
   int width = 800;
   int height = 600;
-  const char* title = "Window";
+  const char *title = "Window";
   bool visible = true;
   bool scale_framebuffer = true;
 };
@@ -50,6 +56,7 @@ public:
   bool should_close() const;
   void request_close();
   bool is_hidden() const;
+  bool key_down(int key) const;
   void swap_buffers();
 
 private:

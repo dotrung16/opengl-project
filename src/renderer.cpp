@@ -1,5 +1,7 @@
 #include "renderer.hpp"
 
+#include "gl_check.hpp"
+
 #include <glad/gl.h>
 
 #include <cstdio>
@@ -16,19 +18,15 @@ void GLAD_API_PTR gl_debug_callback(GLenum, GLenum type, GLuint id,
 }
 #endif
 
-#ifndef NDEBUG
-void check_gl_errors(const char *where) {
-  for (GLenum err; (err = glGetError()) != GL_NO_ERROR;) {
-    std::fprintf(stderr, "GL error 0x%x in %s\n", err, where);
-  }
-}
-#endif
-
 } // namespace
 
 bool Renderer::init() {
   glGetIntegerv(GL_MAJOR_VERSION, &major_);
   glGetIntegerv(GL_MINOR_VERSION, &minor_);
+  if (major_ < 3 || (major_ == 3 && minor_ < 3)) {
+    std::fprintf(stderr, "OpenGL 3.3 required, got %d.%d\n", major_, minor_);
+    return false;
+  }
 
 #if !defined(NDEBUG) && defined(GL_KHR_debug)
   if (GLAD_GL_KHR_debug) {
@@ -38,6 +36,7 @@ bool Renderer::init() {
   }
 #endif
 
+  glEnable(GL_DEPTH_TEST);
   glClearColor(0.15f, 0.45f, 0.45f, 1.0f);
   return true;
 }
@@ -48,8 +47,8 @@ const char *Renderer::device_name() const {
 }
 
 void Renderer::draw(int width, int height) {
-  glViewport(0, 0, width, height);
-  glClear(GL_COLOR_BUFFER_BIT);
+  GL_CHECK(glViewport(0, 0, width, height));
+  GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
 #ifndef NDEBUG
   check_gl_errors("Renderer::draw");

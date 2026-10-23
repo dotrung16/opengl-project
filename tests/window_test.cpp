@@ -37,6 +37,18 @@ GLFWwindowrefreshfun installed_refresh_callback(GLFWwindow *h) {
   return cb;
 }
 
+GLFWcursorposfun installed_cursor_callback(GLFWwindow *h) {
+  GLFWcursorposfun cb = glfwSetCursorPosCallback(h, nullptr);
+  glfwSetCursorPosCallback(h, cb);
+  return cb;
+}
+
+GLFWscrollfun installed_scroll_callback(GLFWwindow *h) {
+  GLFWscrollfun cb = glfwSetScrollCallback(h, nullptr);
+  glfwSetScrollCallback(h, cb);
+  return cb;
+}
+
 } // namespace
 
 TEST(window_create_makes_context_current) {
@@ -76,6 +88,8 @@ TEST(window_installs_all_callbacks) {
   CHECK(installed_focus_callback(f.handle()) != nullptr);
   CHECK(installed_iconify_callback(f.handle()) != nullptr);
   CHECK(installed_refresh_callback(f.handle()) != nullptr);
+  CHECK(installed_cursor_callback(f.handle()) != nullptr);
+  CHECK(installed_scroll_callback(f.handle()) != nullptr);
 }
 
 TEST(window_key_press_is_queued) {
@@ -170,4 +184,37 @@ TEST(window_refresh_requests_redraw) {
   state.needs_redraw = false;
   installed_refresh_callback(f.handle())(f.handle());
   CHECK(state.needs_redraw);
+}
+
+TEST(window_key_down_is_false_for_released_keys) {
+  GlFixture f;
+  if (!f.ok())
+    return;
+  CHECK(!f.window->key_down(GLFW_KEY_W));
+  CHECK(!f.window->key_down(GLFW_KEY_ESCAPE));
+}
+
+TEST(window_cursor_motion_accumulates_deltas) {
+  GlFixture f;
+  if (!f.ok())
+    return;
+  WindowState &state = f.window->state();
+  const GLFWcursorposfun move = installed_cursor_callback(f.handle());
+  move(f.handle(), 10.0, 20.0);
+  CHECK(state.has_cursor);
+  CHECK(state.cursor_dx == 0.0 && state.cursor_dy == 0.0);
+  move(f.handle(), 13.0, 18.0);
+  move(f.handle(), 15.0, 19.0);
+  CHECK(state.cursor_x == 15.0 && state.cursor_y == 19.0);
+  CHECK(state.cursor_dx == 5.0 && state.cursor_dy == -1.0);
+}
+
+TEST(window_scroll_accumulates) {
+  GlFixture f;
+  if (!f.ok())
+    return;
+  const GLFWscrollfun scroll = installed_scroll_callback(f.handle());
+  scroll(f.handle(), 0.0, 1.0);
+  scroll(f.handle(), 0.0, 0.5);
+  CHECK(f.window->state().scroll_dy == 1.5);
 }
